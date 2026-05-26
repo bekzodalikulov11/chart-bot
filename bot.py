@@ -20,6 +20,8 @@ WIDTH = 800
 HEIGHT = 500
 BAR_COUNT = 10
 
+ALLOWED_USER_ID = 333019224
+
 INTERVALS = {
     "м5": ("5m", "M5"),
     "m5": ("5m", "M5"),
@@ -71,11 +73,21 @@ HELP_TEXT = (
 )
 
 
+def is_authorized(update: Update) -> bool:
+    return update.effective_user is not None and update.effective_user.id == ALLOWED_USER_ID
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not is_authorized(update):
+        await update.message.reply_text("У вас нет доступа к этому боту.")
+        return
     await update.message.reply_text(HELP_TEXT)
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not is_authorized(update):
+        await update.message.reply_text("У вас нет доступа к этому боту.")
+        return
     await update.message.reply_text(HELP_TEXT)
 
 
@@ -188,6 +200,9 @@ async def send_chart(
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not is_authorized(update):
+        await update.message.reply_text("У вас нет доступа к этому боту.")
+        return
     text = normalize_message(update.message.text or "")
 
     if text == "all":
